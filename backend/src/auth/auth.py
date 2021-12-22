@@ -176,23 +176,3 @@ def requires_auth(permission=''):
             return f(payload, *args, **kwargs)
         return wrapper
     return requires_auth_decorator
-
-# def requires_auth(permission=''):
-#     def requires_auth_decorator(f):
-#         @wraps(f)
-#         def wrapper(*args, **kwargs):
-#             try:
-#                 token = get_token_auth_header()
-#             except AuthError:
-#                 abort(401)
-#             try:
-#                 payload = verify_decode_jwt(token)
-#             except AuthError:
-#                 abort(401)
-#             try:
-#                 check_permissions(permission, payload)
-#             except AuthError:
-#                 abort(401)
-#             return f(payload, *args, **kwargs)
-#         return wrapper
-#     return requires_auth_decorator

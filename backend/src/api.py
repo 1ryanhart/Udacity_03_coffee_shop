@@ -80,9 +80,10 @@ def get_drinks_long(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
-@requires_auth('post:drinks')
+
 @app.route('/drinks', methods=['POST'])
-def post_drinks():
+@requires_auth('post:drinks')
+def post_drinks(payload):
     try:
         body = request.get_json()
 
@@ -115,9 +116,10 @@ def post_drinks():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
-@requires_auth('patch:drinks')
+
 @app.route('/drinks/<int:id>', methods=['PATCH'])
-def patch_drinks(id):
+@requires_auth('patch:drinks')
+def patch_drinks(payload, id):
     body = request.get_json()
 
     try:
@@ -135,7 +137,7 @@ def patch_drinks(id):
         return jsonify(
         {
             'success': True,
-            'drinks': formatted_drink
+            'drinks': [formatted_drink]
         }), 200
     except Exception as e:
         print(e)
@@ -152,9 +154,10 @@ def patch_drinks(id):
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
-@requires_auth('delete:drinks')
+
 @app.route('/drinks/<int:id>', methods=['DELETE'])
-def delete_drinks(id):
+@requires_auth('delete:drinks')
+def delete_drinks(payload, id):
     drink = Drink.query.filter(Drink.id==id).one_or_none()
 
     if drink is None:
