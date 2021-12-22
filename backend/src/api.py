@@ -28,9 +28,9 @@ db_drop_and_create_all()
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
-@requires_auth('get:drinks')
+
 @app.route('/drinks', methods=['GET'])
-def get_drinks(payload):
+def get_drinks():
     drinks = Drink.query.all()
 
     if len(drinks)== 0:
@@ -42,7 +42,7 @@ def get_drinks(payload):
     {
         'success': True,
         'drinks': formatted_drinks
-    }), 200
+    })
 
 
 
@@ -54,8 +54,9 @@ def get_drinks(payload):
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
-@requires_auth('get:drinks-detail')
+
 @app.route('/drinks-detail', methods=['GET'])
+@requires_auth('get:drinks-detail')
 def get_drinks_long(payload):
     drinks = Drink.query.all()
 
@@ -68,7 +69,7 @@ def get_drinks_long(payload):
     {
         'success': True,
         'drinks': formatted_drinks
-    }), 200
+    })
 
 '''
 @TODO implement endpoint
@@ -81,7 +82,7 @@ def get_drinks_long(payload):
 '''
 @requires_auth('post:drinks')
 @app.route('/drinks', methods=['POST'])
-def post_drinks(payload):
+def post_drinks():
     try:
         body = request.get_json()
 
@@ -116,11 +117,12 @@ def post_drinks(payload):
 '''
 @requires_auth('patch:drinks')
 @app.route('/drinks/<int:id>', methods=['PATCH'])
-def patch_drinks(payload,id):
+def patch_drinks(id):
     body = request.get_json()
-    title = body.get('title', None)
-    recipe = body.get('recipe', None)
+
     try:
+        title = body.get('title', None)
+        recipe = body.get('recipe', None)
         drink = Drink.query.filter(Drink.id==id).one_or_none()
         if drink is None:
             abort(404)
@@ -152,7 +154,7 @@ def patch_drinks(payload,id):
 '''
 @requires_auth('delete:drinks')
 @app.route('/drinks/<int:id>', methods=['DELETE'])
-def delete_drinks(payload,id):
+def delete_drinks(id):
     drink = Drink.query.filter(Drink.id==id).one_or_none()
 
     if drink is None:

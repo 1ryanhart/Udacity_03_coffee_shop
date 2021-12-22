@@ -31,6 +31,7 @@ class AuthError(Exception):
     return the token part of the header
 '''
 def get_token_auth_header():
+
     auth = request.headers.get('Authorization', None)
     if not auth:
         raise AuthError({
@@ -38,7 +39,7 @@ def get_token_auth_header():
             'description': 'Authorization header is expected.'
         }, 401)
 
-    parts = auth.split('.')
+    parts = auth.split(' ')
     if parts[0].lower() != 'bearer':
         raise AuthError({
             'code': 'invalid_header',
@@ -76,13 +77,17 @@ def check_permissions(permission, payload):
         raise AuthError({
             'code': 'invalid_claims',
             'description': 'Permissions not included in JWT.'
-            }, 400)
+        }, 400)
+
     if permission not in payload['permissions']:
-       raise AuthError({
+        raise AuthError({
             'code': 'unauthorized',
             'description': 'Permission not found.'
         }, 403)
     return True
+
+
+
 
 '''
 @TODO implement verify_decode_jwt(token) method
@@ -108,7 +113,6 @@ def verify_decode_jwt(token):
             'code': 'invalid_header',
             'description': 'Authorization malformed.'
         }, 401)
-
     for key in jwks['keys']:
         if key['kid'] == unverified_header['kid']:
             rsa_key = {
@@ -162,34 +166,33 @@ def verify_decode_jwt(token):
     it should use the check_permissions method validate claims and check the requested permission
     return the decorator which passes the decoded payload to the decorated method
 '''
-# def requires_auth(permission=''):
-#     def requires_auth_decorator(f):
-#         @wraps(f)
-#         def wrapper(*args, **kwargs):
-#             token = get_token_auth_header()
-#             payload = verify_decode_jwt(token)
-#             check_permissions(permission, payload)
-#             return f(payload, *args, **kwargs)
-#
-#         return wrapper
-#     return requires_auth_decorator
-
 def requires_auth(permission=''):
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
-            try:
-                token = get_token_auth_header()
-            except AuthError:
-                abort(401)
-            try:
-                payload = verify_decode_jwt(token)
-            except AuthError:
-                abort(401)
-            try:
-                check_permissions(permission, payload)
-            except AuthError:
-                abort(401)
+            token = get_token_auth_header()
+            payload = verify_decode_jwt(token)
+            check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
         return wrapper
     return requires_auth_decorator
+
+# def requires_auth(permission=''):
+#     def requires_auth_decorator(f):
+#         @wraps(f)
+#         def wrapper(*args, **kwargs):
+#             try:
+#                 token = get_token_auth_header()
+#             except AuthError:
+#                 abort(401)
+#             try:
+#                 payload = verify_decode_jwt(token)
+#             except AuthError:
+#                 abort(401)
+#             try:
+#                 check_permissions(permission, payload)
+#             except AuthError:
+#                 abort(401)
+#             return f(payload, *args, **kwargs)
+#         return wrapper
+#     return requires_auth_decorator
